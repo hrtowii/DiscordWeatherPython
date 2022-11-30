@@ -28,7 +28,7 @@ async def unknownMessage(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #start
 if __name__ == '__main__':
     from telegram import Update
-    application = ApplicationBuilder().token('5436275337:AAHTw8JvXpqk_vhTp2ODmibrHG9yeDqt0uM').build()
+    application = ApplicationBuilder().token('no').build()
     start_handler = CommandHandler('start', start)
     weather_handler = CommandHandler('weather', weather)
     unknown_handler = MessageHandler(filters.COMMAND, unknownMessage)
