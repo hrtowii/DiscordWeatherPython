@@ -3,7 +3,7 @@ import json
 import os.path
 from discord_webhook import DiscordWebhook, DiscordEmbed
 import time
-        
+
 
 base_url = 'https://api.openweathermap.org/data/2.5/weather?units=metric&lat={}&lon={}&appid={}'
 location_url = 'http://api.openweathermap.org/geo/1.0/reverse?lat={}&lon={}&appid={}'
