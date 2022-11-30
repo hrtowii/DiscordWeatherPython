@@ -12,15 +12,17 @@ def config():
     if os.path.exists('config.json'):
         return json.load(open('config.json'))
     else:
-        print("Hello! This script uses the OpenWeatherMap API. Please create an account at https://home.openweathermap.org/users/sign_up and find your API key.")
+        print("Hello! This script uses the OpenWeatherMap API and Discord Webhooks API. For OpenWeatherMap, please create an account at https://home.openweathermap.org/users/sign_up and find your API key.\n For Discord Webhooks, go to your Discord Server -> Server Settings -> Integrations -> Webhooks, create a webhook, and copy the webhook link.")
         api_key = input("Please input API key: ")
+        discord_api_key = input("Please paste your webhook API link: ")
         lat = input("Please input the latitude of your location: ")
         lon = input("Please input the longtitude of your location: ")
         time = int(input("How many seconds in between each message? (In seconds): "))
         # convert into json and save as config.json
-        data = {'apikey': api_key, 'lat': lat, 'lon': lon, 'interval': time}
+        data = {'api_key': api_key, 'discord_api_key': discord_api_key, 'lat': lat, 'lon': lon, 'interval': time}
         with open('config.json', 'w') as f:
             json.dump(data, f)
+
 cfg = config()
 
 def discordweather(lat, lon, api_key):
@@ -28,11 +30,26 @@ def discordweather(lat, lon, api_key):
     countryname = requests.get(location_url.format(lat, lon, api_key))
     jsonResponse = response.json()
     
-    webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1047467591381295154/2q1izZ9xgH3GnMvKlHr6N3h9m26z7rB4G9OWld2-470Y-vxhhPcHJxytpB68EqjIGjZn')
+    webhook = DiscordWebhook(url=cfg["discord_api_key"])
     embed = DiscordEmbed(
-        title='Weather right now in ' + str(countryname.json()[0]["name"]) + ", " + str(countryname.json()[0]["country"]),
-        description='Temperature: ' + str(jsonResponse['main']["temp"]) + " ℃ \nFeels like: " + str(jsonResponse['main']["feels_like"]) + " ℃ \nHumidity: " + str(jsonResponse['main']["humidity"]) + "%",
-        color='03b2f8'
+        title='Weather right now in {}, {} '.format(str(countryname.json()[0]["name"]), str(countryname.json()[0]["country"])),
+        color='03b2f8',
+        fields=[{
+            "name": "Temperature", 
+            "value": str(jsonResponse['main']["temp"]) + "℃",
+            "inline": False
+        },
+        {
+            "name": "Feels like",
+            "value": str(jsonResponse['main']["feels_like"]) + "℃",
+            "inline": False
+        },
+        {
+            "name": "Relative Humidity",
+            "value": str(jsonResponse['main']["humidity"]) + "%",
+            "inline": False
+        }],
+        timestamp=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     )
 
     # add embed object to webhook
@@ -40,6 +57,10 @@ def discordweather(lat, lon, api_key):
 
     webhook.execute()
 
-while True:
-    discordweather(cfg["lat"], cfg["lon"], cfg["apikey"])
-    time.sleep(cfg["interval"])
+try:
+    while True:
+        discordweather(cfg["lat"], cfg["lon"], cfg["api_key"])
+        time.sleep(cfg["interval"])
+except KeyboardInterrupt:
+    print("Exiting...")
+    
